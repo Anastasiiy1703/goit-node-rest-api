@@ -1,70 +1,86 @@
-const {listContacts,getContactById, addContact,removeContact, updateOneContact } = require("../services/contactsServices")
+const { listContacts, getContactById, addContact, removeContact, updateOneContact } = require("../services/contactsServices");
+const { HttpError } = require("../helpers/HttpError.js");
+const { createContactSchema, updateContactSchema } = require("../schemas/contactsSchemas.js");
 
 
-const getAllContacts = async (req, res) => {
+const getAllContacts = async (req, res, next) => {
   try {
     const contacts = await listContacts();
     res.status(200).json(contacts);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server Error" });
+    next(error);
   }
 };
 
- const getOneContact = async (req, res) => {
-  const contactId = req.params.id;
+const getOneContact = async (req, res, next) => {
   try {
+    const contactId = req.params.id;
     const contact = await getContactById(contactId);
-    if (contact) {
-      res.status(200).json(contact);
-    } else {
-      res.status(404).json({ message: "Not found" });
+
+    if (!contact) {
+      throw HttpError(404);
     }
+
+    res.status(200).json(contact);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server Error" });
+    next(error);
   }
 };
 
- const deleteContact = async (req, res) => {
-  const contactId = req.params.id;
+const deleteContact = async (req, res, next) => {
   try {
+    const contactId = req.params.id;
     const deletedContact = await removeContact(contactId);
-    if (deletedContact) {
-      res.status(200).json(deletedContact);
-    } else {
-      res.status(404).json({ message: "Not found" });
+
+    if (!deletedContact) {
+      throw HttpError(404);
     }
+
+    res.status(204).json(deletedContact);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server Error" });
+    next(error);
   }
 };
 
- const createContact = async (req, res) => {
-  const { name, email, phone } = req.body;
+const createContact = async (req, res, next) => {
   try {
-    const newContact = await addContact(name, email, phone);
+    const { error } = createContactSchema.validate(req.body);
+
+    if (error) {
+      throw HttpError(400, error.message);
+    }
+
+    const newContact = await addContact(req.body);
     res.status(201).json(newContact);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server Error" });
+    next(error);
   }
 };
 
-const updateContact = async (req, res) => {
-  const contactId = req.params.id;
-  const updatedData = req.body;
+const updateContact = async (req, res, next) => {
   try {
-    const updatedContact = await updateOneContact(contactId, updatedData);
-    if (updatedContact) {
-      res.status(200).json(updatedContact);
-    } else {
-      res.status(404).json({ message: "Not found" });
+    const contactId = req.params.id;
+    const bodyIsEmpty = Object.keys(req.body).length === 0;
+
+    if (bodyIsEmpty) {
+      throw HttpError(400, "Body must have at least one field");
     }
+
+    const { error } = updateContactSchema.validate(req.body);
+
+    if (error) {
+      throw HttpError(400, error.message);
+    }
+
+    const updatedContact = await updateOneContact(contactId, req.body);
+
+    if (!updatedContact) {
+      throw HttpError(404);
+    }
+
+    res.status(200).json(updatedContact);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server Error" });
+    next(error);
   }
 };
 
