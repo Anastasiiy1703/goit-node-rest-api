@@ -1,11 +1,5 @@
 import express from "express";
-import {
-  getAllContacts,
-  getOneContact,
-  deleteContact,
-  createContact,
-  updateContact,
-} from "../controllers/contactsControllers.js";
+import { getAllContacts, getOneContact, deleteContact, createContact, updateContact } from "../controllers/contactsControllers";
 
 const contactsRouter = express.Router();
 
