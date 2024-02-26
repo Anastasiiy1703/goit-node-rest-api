@@ -2,14 +2,7 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 import contactsRouter from "./routes/contactsRouter.js";
-import mongoose from "mongoose";
-import { error } from "console";
-
-const DB_URI = 'mongodb+srv://Anastasiia:qAI20JBkMpVxCoqU@cluster0.ffq32dt.mongodb.net/db-contacts?retryWrites=true&w=majority&appName=Cluster0'
-
-mongoose.connect(DB_URI)
-  .then(() => console.log("Database connection successful"))
-  .catch(error => console.log("Databese connection error"));
+import "dotenv/config.js";
 
 const app = express();
 
@@ -33,3 +26,7 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running. Use our API on port: ${PORT}`);
 });
+
+
+
+

@@ -1,64 +1,77 @@
-import fs from "fs/promises";
-import path from "path";
-import { v4 as uuidv4 } from 'uuid';
-
-const contactsPath = path.join(__dirname, "..", "db", "contacts.json");
+import { contacts } from "../models/contacts.js";
 
 async function listContacts() {
-  const contacts = await fs.readFile(contactsPath);
-  return JSON.parse(contacts);
+  return await contacts.find();
 }
 
 async function getContactById(contactId) {
-  const contacts = await listContacts();
-  const contact = contacts.find(el => el.id === contactId);
-  return contact || null;
+  const contact = await contacts.findById(contactId);
+  if (contact) {
+    return contact;
+  } else {
+    return null;
+  }
 }
 
 async function removeContact(contactId) {
-  const contacts = await listContacts();
-  const deletedContactIndex = contacts.findIndex((contact) => contact.id === contactId);
-
-  if (deletedContactIndex !== -1) {
-    const [deletedContact] = contacts.splice(deletedContactIndex, 1);
-    await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
-    return deletedContact;
-  } else {
+  const deletedContact = await contacts.findByIdAndDelete(contactId);
+  if (deletedContact === null) {
     return null;
   }
+  return deletedContact;
 }
 
-async function addContact(name, email, phone) {
-  const contacts = await listContacts();
-  const newContact = {
-    id: uuidv4(),
-    name,
-    email,
-    phone,
-  };
-  contacts.push(newContact);
+async function addContact({ name, email, phone, favorite }) {
+  const newContact = await contacts.create({ name, email, phone, favorite });
 
-  await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
   return newContact;
 }
 
-async function updateOneContact(contactId, updatedData) {
-  const contacts = await listContacts();
-  const contactIndex = contacts.findIndex((contact) => contact.id === contactId);
-
-  if (contactIndex !== -1) {
-    contacts[contactIndex] = { ...contacts[contactIndex], ...updatedData };
-    await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
-    return contacts[contactIndex];
+async function updateContact(contactId, { id, name, email, phone, favorite }) {
+  const newContact = {
+    id,
+    name,
+    email,
+    phone,
+    favorite,
+  };
+  const updatedContact = await contacts.findByIdAndUpdate(
+    contactId,
+    newContact,
+    {
+      new: true,
+    }
+  );
+  if (updateContact !== null) {
+    return updatedContact;
   } else {
     return null;
   }
 }
 
-export {
+async function updateStatusContact(contactId, { favorite }) {
+  const newContact = {
+    favorite,
+  };
+  const updatedContact = await contacts.findByIdAndUpdate(
+    contactId,
+    newContact,
+    {
+      new: true,
+    }
+  );
+  if (updateContact !== null) {
+    return updatedContact;
+  } else {
+    return null;
+  }
+}
+
+export default {
   listContacts,
   getContactById,
-  addContact,
   removeContact,
-  updateOneContact
+  addContact,
+  updateContact,
+  updateStatusContact,
 };
