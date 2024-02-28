@@ -1,6 +1,6 @@
-import mongoose from "mongoose";
+import { model, Schema } from "mongoose";
 
-const contactsSchema = new mongoose.Schema(
+const contactsSchema = new Schema(
   {
     name: {
       type: String,
@@ -11,7 +11,6 @@ const contactsSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
-      match: /(\d{10}|\(\d{3}\) \d{3}-\d{4})/,
     },
     favorite: {
       type: Boolean,
@@ -21,4 +20,6 @@ const contactsSchema = new mongoose.Schema(
   { versionKey: false }
 );
 
-export const contacts = mongoose.model("contacts", contactsSchema);
+const Contact = model("contacts", contactsSchema);
+
+export { Contact };

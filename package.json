@@ -2,8 +2,8 @@
   "name": "goit-node-rest-api",
   "type": "module",
   "scripts": {
-    "start": "node ./app.js",
-    "dev": "nodemon ./app.js"
+    "start": "node ./run.js",
+     "dev": "node --watch ./run.jsn"
   },
   "dependencies": {
     "commander": "^12.0.0",
