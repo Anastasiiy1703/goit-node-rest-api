@@ -1,76 +1,73 @@
-import { Contact } from "../schemas/mdSchema";
+import { contacts } from "../models/contacts.js";
 
-const listContacts = async () => {
-  try {
-    const contacts = await Contact.find();
-    return contacts;
-  } catch (error) {
-    console.log(`Error: ${error}`);
-  }
-};
+async function listContacts() {
+  return await contacts.find();
+}
 
-async function getContactById(id) {
-  try {
-    const contact = await Contact.findById(id);
-    return contact || null;
-  } catch (error) {
+async function getContactById(contactId) {
+  const contact = await contacts.findById(contactId);
+  if (contact) {
+    return contact;
+  } else {
     return null;
   }
 }
 
-async function removeContact(id) {
-  try {
-    const removedContact = await Contact.findByIdAndDelete(id);
-    return removedContact || null;
-  } catch (error) {
+async function removeContact(contactId) {
+  const deletedContact = await contacts.findByIdAndDelete(contactId);
+  if (deletedContact === null) {
     return null;
   }
+  return deletedContact;
 }
 
-async function addContact(name, email, phone) {
-  try {
-    const newContact = await Contact.create({ name, email, phone });
-    return newContact;
-  } catch (error) {
-    return null;
-  }
+async function addContact({ name, email, phone, favorite }) {
+  const newContact = await contacts.create({ name, email, phone, favorite });
+
+  return newContact;
 }
 
-async function updateOneContact(id, name, email, phone) {
-  try {
-    const existingContact = await Contact.findById(id);
-
-    if (!existingContact) {
-      return null;
+async function updateContact(contactId, { id, name, email, phone, favorite }) {
+  const newContact = {
+    id,
+    name,
+    email,
+    phone,
+    favorite,
+  };
+  const updatedContact = await contacts.findByIdAndUpdate(
+    contactId,
+    newContact,
+    {
+      new: true,
     }
-
-    existingContact.name = name || existingContact.name;
-    existingContact.email = email || existingContact.email;
-    existingContact.phone = phone || existingContact.phone;
-
-    await existingContact.save();
-
-    return existingContact;
-  } catch (error) {
-    return null;
-  }
-}
-
-async function updateStatusContact(id, favorite) {
-  try {
-    const updatedContact = await Contact.findByIdAndUpdate(
-      id,
-      { favorite },
-      { new: true }
-    );
+  );
+  if (updateContact !== null) {
     return updatedContact;
-  } catch (error) {
-    console.error(`Error updating contact status: ${error}`);
+  } else {
     return null;
   }
 }
 
-export {
+async function updateStatusContact(contactId, { favorite }) {
+  const newContact = {
+    favorite,
+  };
+  const updatedContact = await contacts.findByIdAndUpdate(
+    contactId,
+    newContact,
+    {
+      new: true,
+    }
+  );
+  if (updateContact !== null) {
+    return updatedContact;
+  } else {
+    return null;
+  }
+}
+
+export default {
   listContacts,
   getContactById,
   removeContact,
