@@ -1,4 +1,4 @@
-import { contacts } from "../models/contacts.js";
+import { contacts } from "../models/contact.js";
 
 async function listContacts({ user, favorite, page, limit }) {
   const owner = user.id;
